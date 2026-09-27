@@ -1,10 +1,14 @@
 {
     "name": "feature-flags",
     "private": true,
-    "workspaces": ["api"],
+    "workspaces": [
+        "api"
+    ],
     "scripts": {
         "dev:api": "npm run dev -w api",
         "db:up": "docker compose up -d db",
-        "db:down": "docker compose down"
+        "db:down": "docker compose down",
+        "db:migrate": "npm run migrate -w api",
+        "db:seed": "npm run seed -w api"
     }
 }
