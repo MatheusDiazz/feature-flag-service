@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireAuth } from "../auth.js";
 import { isUniqueViolation, pool } from "../db.js";
 import { isUuid, sendValidationError } from "../validation.js";
-
+import { generateApiKey } from "../keys.js";
 export const projectsRouter = Router();
 projectsRouter.use(requireAuth);
 
@@ -92,4 +92,33 @@ projectsRouter.post("/:id/flags", async (req, res) => {
     }
     throw err;
   }
+});
+
+projectsRouter.get("/:id/api-keys", async (req, res) => {
+  if (!(await isProjectOwner(req.params.id, req.userId!))) {
+    res.status(404).json({ error: "project not found" });
+    return;
+  }
+
+  const { rows } = await pool.query(
+    `SELECT id, prefix, created_at AS "createdAt", revoked_at AS "revokedAt"
+     FROM api_keys WHERE project_id = $1 ORDER BY created_at DESC`,
+    [req.params.id],
+  );
+  res.json({ apiKeys: rows });
+});
+
+projectsRouter.post("/:id/api-keys", async (req, res) => {
+  if (!(await isProjectOwner(req.params.id, req.userId!))) {
+    res.status(404).json({ error: "project not found" });
+    return;
+  }
+
+  const { key, hash, prefix } = generateApiKey();
+  const { rows: [apiKey] } = await pool.query(
+    `INSERT INTO api_keys (project_id, key_hash, prefix) VALUES ($1, $2, $3)
+     RETURNING id, prefix, created_at AS "createdAt"`,
+    [req.params.id, hash, prefix],
+  );
+  res.status(201).json({ apiKey: { ...apiKey, key } });
 });

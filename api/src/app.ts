@@ -3,9 +3,12 @@ import { pool } from "./db.js";
 import { authRouter } from "./routes/auth.js";
 import { flagsRouter } from "./routes/flags.js";
 import { projectsRouter } from "./routes/projects.js";
+import { apiKeysRouter } from "./routes/apiKeys.js";
+import { sdkRouter } from "./routes/sdk.js";
 export const app = express();
 app.use(express.json());
-
+app.use("/api-keys", apiKeysRouter);
+app.use("/sdk", sdkRouter);
 app.get("/health", async (_req, res) => {
   try {
     await pool.query("SELECT 1");
