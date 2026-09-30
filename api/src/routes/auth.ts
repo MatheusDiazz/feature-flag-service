@@ -3,7 +3,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { requireAuth, signToken } from "../auth.js";
 import { isUniqueViolation, pool } from "../db.js";
-
+import { sendValidationError } from "../validation.js";
 export const authRouter = Router();
 
 const credentialsSchema = z.object({
@@ -13,10 +13,7 @@ const credentialsSchema = z.object({
 
 authRouter.post("/register", async (req, res) => {
   const parsed = credentialsSchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: "invalid input", details: z.flattenError(parsed.error).fieldErrors });
-    return;
-  }
+  if (!parsed.success) return sendValidationError(res, parsed.error);
   const { email, password } = parsed.data;
 
   const passwordHash = await bcrypt.hash(password, 10);
@@ -37,10 +34,7 @@ authRouter.post("/register", async (req, res) => {
 
 authRouter.post("/login", async (req, res) => {
   const parsed = credentialsSchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: "invalid input", details: z.flattenError(parsed.error).fieldErrors });
-    return;
-  }
+  if (!parsed.success) return sendValidationError(res, parsed.error);
   const { email, password } = parsed.data;
 
   const { rows: [user] } = await pool.query<{ id: string; email: string; password_hash: string }>(
