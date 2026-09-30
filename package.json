@@ -9,6 +9,7 @@
         "db:up": "docker compose up -d db",
         "db:down": "docker compose down",
         "db:migrate": "npm run migrate -w api",
-        "db:seed": "npm run seed -w api"
+        "db:seed": "npm run seed -w api",
+        "test": "npm test -w api"
     }
 }
