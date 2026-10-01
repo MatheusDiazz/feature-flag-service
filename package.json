@@ -2,7 +2,7 @@
     "name": "feature-flags",
     "private": true,
     "workspaces": [
-        "api"
+        "api", "sdk"
     ],
     "scripts": {
         "dev:api": "npm run dev -w api",
@@ -10,6 +10,7 @@
         "db:down": "docker compose down",
         "db:migrate": "npm run migrate -w api",
         "db:seed": "npm run seed -w api",
-        "test": "npm test -w api"
+        "test": "npm test -workspaces",
+        "typecheck": "npm run typecheck --workspaces"
     }
 }
